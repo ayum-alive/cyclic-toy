@@ -1,0 +1,22 @@
+<!doctype html><meta charset=utf-8><title>Cyclic automaton</title>
+<style>body{background:#10101a;color:#eee;font:14px sans-serif;text-align:center;margin:12px}canvas{image-rendering:pixelated;width:min(90vw,480px);border:1px solid #444}label{margin:0 8px}</style>
+<h3>Cyclic automaton</h3>
+<canvas id=c width=120 height=120></canvas><br>
+<label>states <input id=S type=range min=3 max=20 value=14><b id=sv>14</b></label>
+<label>range <input id=R type=range min=1 max=3 value=1><b id=rv>1</b></label>
+<label>threshold <input id=T type=range min=1 max=12 value=1><b id=tv>1</b></label>
+<button id=re>restart</button>
+<p>A cell steps to the next colour when enough neighbours already have it. Try threshold 1, 14 states for spirals; raise it and watch it freeze into noise.</p>
+<script>
+const N=120,c=document.getElementById('c'),x=c.getContext('2d'),im=x.createImageData(N,N);
+let g,S,R,T;
+function rs(){S=+Sv.value;R=+Rv.value;T=+Tv.value;sv.textContent=S;rv.textContent=R;tv.textContent=T;g=new Uint8Array(N*N).map(_=>Math.random()*S|0)}
+const Sv=document.getElementById('S'),Rv=document.getElementById('R'),Tv=document.getElementById('T');
+[Sv,Rv,Tv].forEach(e=>e.oninput=rs);document.getElementById('re').onclick=rs;
+function hsv(h){const f=n=>{const k=(n+h*6)%6;return 255*(.95-.95*.7*Math.max(0,Math.min(k,4-k,1)))};return[f(5),f(3),f(1)]}
+function step(){const h=new Uint8Array(N*N);for(let i=0;i<N;i++)for(let j=0;j<N;j++){const v=g[i*N+j],nx=(v+1)%S;let n=0;
+for(let a=-R;a<=R;a++)for(let b=-R;b<=R;b++){if(!a&&!b)continue;if(g[((i+a+N)%N)*N+(j+b+N)%N]==nx)n++}
+h[i*N+j]=n>=T?nx:v}g=h}
+function draw(){for(let k=0;k<N*N;k++){const[r,gg,b]=hsv(g[k]/S);im.data[4*k]=r;im.data[4*k+1]=gg;im.data[4*k+2]=b;im.data[4*k+3]=255}x.putImageData(im,0,0)}
+rs();(function f(){step();draw();requestAnimationFrame(f)})();
+</script>
